@@ -11,6 +11,7 @@ import os
 import random
 
 from absl import app
+
 import carla
 
 def main(argv):
@@ -20,7 +21,7 @@ def main(argv):
     # First of all, we need to create the client that will send the requests
     # to the simulator. Here we'll assume the simulator is accepting
     # requests in the localhost at port 2000.
-    host_ip = os.environ['host_ip']
+    host_ip = '127.0.0.1'
     client = carla.Client(host_ip, 2000)
     client.set_timeout(2.0)
 

@@ -1,26 +1,20 @@
 """
 1. Create a main_vehicle
 2. Create a camera and attach to main_vehicle
-3. Create some npc_vehicles
-4. Keep spectator as the camera.
+3. Streaming in cv2.imshow().
 """
 
-# Modified from https://github.com/carla-simulator/carla/blob/master/PythonAPI/examples/tutorial.py
-
-import os
 import random
-from absl import app
 
 import cv2
+import numpy as np
+from absl import app
+
 import carla
 
-import numpy as np
-import matplotlib.pyplot as plt
 def show_image(carla_img):
-  np_img = np.array(carla_img.raw_data, dtype=np.uint8)\
-            .reshape((600, 800, 4))[:,:,:3]
-
-  cv2.imshow(np_img)
+  np_img = np.array(carla_img.raw_data, dtype=np.uint8).reshape((600, 800, 4))[:,:,:3]
+  cv2.imshow("Stream", np_img)
   cv2.waitKey(1)
 
 def main(argv):
@@ -30,9 +24,10 @@ def main(argv):
     # First of all, we need to create the client that will send the requests
     # to the simulator. Here we'll assume the simulator is accepting
     # requests in the localhost at port 2000.
-    host_ip = os.environ['host_ip']
+#     host_ip = os.environ['host_ip']
+    host_ip = '127.0.0.1'
     client = carla.Client(host_ip, 2000)
-    client.set_timeout(2.0)
+    client.set_timeout(5.0)
 
     # Once we have a client we can retrieve the world that is currently running.
     world = client.get_world()
@@ -86,43 +81,20 @@ def main(argv):
     actor_list.append(camera)
     print('created %s' % camera.type_id)
 
-    # But the city now is probably quite empty, let's add some vehicles
-    # `get_spawn_points()` will get you the recommended spawn points, avoid
-    # getting vehicles in sidewalk, or in the building.
-    spawn_points = world.get_map().get_spawn_points()
-    
-    # Create vehicles in random spawn points
-    NUM_OF_VEHS = 0
-    for i in range(0, NUM_OF_VEHS):
-      # randomly pick a car and its position in the map
-      bp = random.choice(blueprint_library.filter('vehicle'))
-      init_main_transform = random.choice(spawn_points)
-
-      # This time we are using `try_spawn_actor()`. If the spot is already
-      # occupied by another object, the function will return None.
-      npc = world.try_spawn_actor(bp, init_main_transform)
-      if npc is not None:
-        actor_list.append(npc)
-        npc.set_autopilot(True)
-        print('created %s' % npc.type_id)
-
-    # In synchronous_mode, server will sync with client, i.e. wait for
-    # clients computation complete and tell server it is ready. So world.tick()
-    # is notifying server it is ready.
+    # When sensor gets data, it will process with `show_image()`
     camera.listen(lambda data: show_image(data))
-    # camera.listen(lambda image: cv2.imshow('The Camera', image.convert(carla.ColorConverter.Raw)))
-
+    
+    import time
     while True:
-      world.get_spectator().set_transform(camera.get_transform())
+      time.sleep(0.04)
       world.tick()
     
   finally:
-    cv2.destroyAllWindows()
     print('destroying actors')
-    camera.destroy()
+    camera.listen(lambda data: data)
     client.apply_batch([carla.command.DestroyActor(x) for x in actor_list])
+    cv2.destroyWindow("Stream")
     print('done.')
-    world.tick()
 
 if __name__ == '__main__':
   app.run(main)
