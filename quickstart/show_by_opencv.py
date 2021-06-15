@@ -12,7 +12,11 @@ from absl import app
 
 import carla
 
+synchronous_master=True
+
 def show_image(carla_img):
+  """Stream the view from camera."""
+  #TODO: It is stuttering, need to make it smoother.
   np_img = np.array(carla_img.raw_data, dtype=np.uint8).reshape((600, 800, 4))[:,:,:3]
   cv2.imshow("Stream", np_img)
   cv2.waitKey(1)
@@ -84,17 +88,25 @@ def main(argv):
     # When sensor gets data, it will process with `show_image()`
     camera.listen(lambda data: show_image(data))
     
-    import time
     while True:
-      time.sleep(0.04)
       world.tick()
     
   finally:
-    print('destroying actors')
-    camera.listen(lambda data: data)
+    print('Disconnecting from server...')
+    # Because in sync mode, server will wait for the tick from client,
+    # but after the client is interrupted, we don't have anyone can send
+    # the tick, that's why we need to get it back to the acsync mode.
+    # WARNING: It works only for single client mode!
+    if synchronous_master:
+      settings = world.get_settings()
+      settings.synchronous_mode = False
+      settings.fixed_delta_seconds = None
+      world.apply_settings(settings)
+    print('Destroying actors')
+    cv2.destroyAllWindows()
+    camera.destroy()
     client.apply_batch([carla.command.DestroyActor(x) for x in actor_list])
-    cv2.destroyWindow("Stream")
-    print('done.')
+    print('Done.')
 
 if __name__ == '__main__':
   app.run(main)
