@@ -1,11 +1,10 @@
 """
-1. Create a main_vehicle
-2. Create a camera and attach to main_vehicle
-3. Streaming in cv2.imshow().
+1. Create a main_vehicle and camera
+2. Create another car in front of it
+3. Use YOLO try to recognize the front car.
 """
 
 import random
-import os
 
 import cv2
 import torch
