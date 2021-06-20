@@ -1,5 +1,6 @@
 # New added by me
 tmp/
+.pt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

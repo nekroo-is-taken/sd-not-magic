@@ -5,7 +5,7 @@
 """
 
 import random
-import copy
+import os
 
 import cv2
 import torch
@@ -34,10 +34,11 @@ def show_image(carla_img):
 
 def init_yolo():
   global model
-  model = torch.hub.load('ultralytics/yolov5', 'yolov5l', pretrained=True)
+  # MODEL_STORAGE_PATH = os.path.join(os.path.abspath(os.path.dirname(__file__)), '..', 'model', 'pretrained')
+  # torch.hub.set_dir(MODEL_STORAGE_PATH)
+  model = torch.hub.load('ultralytics/yolov5', 'yolov5l6', pretrained=True)
 
 def main(argv):
-  
   actor_list = []
 
   try:
