@@ -5,7 +5,6 @@
 """
 
 import random
-import os
 
 import cv2
 import torch
@@ -28,7 +27,7 @@ def show_image(carla_img):
   global model
   count += 1
   np_img = np.array(carla_img.raw_data, dtype=np.uint8).reshape((600, 800, 4))#[:,:,:3]
-  np_img = cv2.cvtColor(np_img, cv2.COLOR_RGB2BGR)
+  np_img = cv2.cvtColor(np_img, cv2.COLOR_BGR2RGB)
   res = model(np_img)
   res.show()
 
