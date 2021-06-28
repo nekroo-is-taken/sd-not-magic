@@ -17,13 +17,13 @@ import carla
 
 SYNC_MASTER = True
 USE_CUDA_IN_FFMPEG = True  # Set 'False' if you don't need CUDA.
-MAX_NUM = 1000  # Number to take pictures from camera.
+MAX_NUM = 2000  # Number to take pictures from camera.
 IMAGE_FOLDER = '../tmp'
 OUT_VIDEO_RAW = f'{IMAGE_FOLDER}/{Path(__file__).stem}.mp4'
 # Set output path for the video
 # Processed video will be stored under 'YOLO_VIDEO_PROJECT/YOLO_VIDEO_FOLDER'
-YOLO_VIDEO_PROJECT = '..'
-YOLO_VIDEO_FOLDER = 'out'
+YOLO_VIDEO_PROJECT = f'../out/{Path(__file__).stem}'
+YOLO_VIDEO_FOLDER = 'model'
 YOLO_DETECT = Path('../../../common/yolov5/detect.py')
 random.seed(2)
 
@@ -45,8 +45,15 @@ def make_video(input_dir, raw_video, yolo_project, yolo_folder):
     subprocess.check_output(
         f'ffmpeg {"-hwaccel cuda" if USE_CUDA_IN_FFMPEG else ""} -y -r 25 -s 800x600 -i {input_dir}/%04d.png -vcodec libx264 -crf 25 -pix_fmt yuv420p {raw_video}',
         shell=True)
+    
+    # Fine tuned model
     subprocess.check_output(
-        f'python {YOLO_DETECT} --source {raw_video} --weights yolov5l6.pt --conf 0.25 --project {yolo_project} --name {yolo_folder} --exist-ok',
+        f'python {YOLO_DETECT} --source {raw_video} --weights yolov5l6.pt --conf 0.25 --project {yolo_project} --name {yolo_folder}',
+        shell=True)
+
+    # Original model
+    subprocess.check_output(
+        f'python {YOLO_DETECT} --source {raw_video} --weights yolov5l6_ft.pt --conf 0.5 --project {yolo_project} --name {yolo_folder}',
         shell=True)
 
 def spawn_npc():

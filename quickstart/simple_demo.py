@@ -99,7 +99,7 @@ def main(argv):
     # clients computation complete and tell server it is ready. So world.tick()
     # is notifying server it is ready.
     while True:
-      world.get_spectator().set_transform(camera.get_transform())
+      # world.get_spectator().set_transform(camera.get_transform())
       world.tick()
 
   finally:
